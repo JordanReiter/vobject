@@ -203,10 +203,10 @@ class TimezoneComponent(Component):
                             'month'   : transition.month,
                             'weekday' : transition.weekday(),
                             'hour'    : transition.hour,
-                            'name'    : tzinfo.tzname(transition),
+                            'name'    : tzinfo.tzname(transition + datetime.timedelta(hours=1)),
                             'plus'    : (transition.day - 1)/ 7 + 1,#nth week of the month
                             'minus'   : fromLastWeek(transition), #nth from last week
-                            'offset'  : tzinfo.utcoffset(transition), 
+                            'offset'  : tzinfo.utcoffset(transition + datetime.timedelta(hours=1)), 
                             'offsetfrom' : old_offset}
         
                     if oldrule is None: 
