@@ -1893,7 +1893,7 @@ def getTransition(transitionTo, year, tzinfo):
                     pass
         else:
             for hour in hours:
-                yield datetime.datetime(year, month, day, hour, 1)
+                yield datetime.datetime(year, month, day, hour)
 
     assert transitionTo in ('daylight', 'standard')
     if transitionTo == 'daylight':
@@ -1903,7 +1903,7 @@ def getTransition(transitionTo, year, tzinfo):
             except (NonExistentTimeError, AmbiguousTimeError):
                 return True
     elif transitionTo == 'standard':
-        def test(dt):
+        def test(dt): 
             try:
                 return tzinfo.dst(dt) == zeroDelta
             except (NonExistentTimeError, AmbiguousTimeError):
@@ -1924,9 +1924,9 @@ def getTransition(transitionTo, year, tzinfo):
             # possible hour, we need to add one hour for the offset change
             # and another hour because firstTransition returns the hour
             # before the transition
-            return uncorrected + datetime.timedelta(hours=2) + datetime.timedelta(minutes=2)
+            return uncorrected + datetime.timedelta(hours=2)
         else:
-            return uncorrected + datetime.timedelta(hours=1) - datetime.timedelta(minutes=2)
+            return uncorrected + datetime.timedelta(hours=1)
 
 def tzinfo_eq(tzinfo1, tzinfo2, startYear = 2000, endYear=2020):
     """Compare offsets and DST transitions from startYear to endYear."""
