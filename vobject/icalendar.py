@@ -9,6 +9,15 @@ import datetime
 import socket, random #for generating a UID
 import itertools
 
+try:
+    from pytz import NonExistentTimeError, AmbiguousTimeError
+except ImportError:
+    class NonExistentTimeError(StandardError):
+        pass
+    class AmbiguousTimeError(StandardError):
+        pass
+    
+
 from base import (VObjectError, NativeError, ValidateError, ParseError,
                     VBase, Component, ContentLine, logger, defaultSerialize,
                     registerBehavior, backslashEscape, foldOneLine,
@@ -1884,13 +1893,21 @@ def getTransition(transitionTo, year, tzinfo):
                     pass
         else:
             for hour in hours:
-                yield datetime.datetime(year, month, day, hour)
+                yield datetime.datetime(year, month, day, hour, 1)
 
     assert transitionTo in ('daylight', 'standard')
     if transitionTo == 'daylight':
-        def test(dt): return tzinfo.dst(dt) != zeroDelta
+        def test(dt): 
+            try:
+                return tzinfo.dst(dt) != zeroDelta
+            except (NonExistentTimeError, AmbiguousTimeError):
+                return True
     elif transitionTo == 'standard':
-        def test(dt): return tzinfo.dst(dt) == zeroDelta
+        def test(dt):
+            try:
+                return tzinfo.dst(dt) == zeroDelta
+            except (NonExistentTimeError, AmbiguousTimeError):
+                return True
     newyear = datetime.datetime(year, 1, 1)
     monthDt = firstTransition(generateDates(year), test)
     if monthDt is None:
@@ -1907,9 +1924,9 @@ def getTransition(transitionTo, year, tzinfo):
             # possible hour, we need to add one hour for the offset change
             # and another hour because firstTransition returns the hour
             # before the transition
-            return uncorrected + datetime.timedelta(hours=2)
+            return uncorrected + datetime.timedelta(hours=2) + datetime.timedelta(minutes=2)
         else:
-            return uncorrected + datetime.timedelta(hours=1)
+            return uncorrected + datetime.timedelta(hours=1) - datetime.timedelta(minutes=2)
 
 def tzinfo_eq(tzinfo1, tzinfo2, startYear = 2000, endYear=2020):
     """Compare offsets and DST transitions from startYear to endYear."""
